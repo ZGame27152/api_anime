@@ -8,13 +8,12 @@ app.use(cors());
 
 const connection = mysql.createConnection(process.env.DATABASE_URL);
 
-// ตรวจสอบการเชื่อมต่อกับฐานข้อมูล
 connection.connect((err) => {
   if (err) {
-    console.error('Error connecting to the database:', err);
+    console.error('Error connecting to the database:', err.stack);
     return;
   }
-  console.log('Connected to the database.');
+  console.log('Connected to the database as id ' + connection.threadId);
 });
 
 app.get('/', (req, res) => {
@@ -22,22 +21,23 @@ app.get('/', (req, res) => {
 });
 
 app.get('/anime', (req, res) => {
-  connection.query('SELECT * FROM anime', function (err, results, fields) {
+  connection.query('SELECT * FROM anime', (err, results) => {
     if (err) {
-      console.error('Error executing query:', err);
-      res.status(500).send('Error executing query');
+      console.error('Error executing query:', err.stack);  // เพิ่มการแสดงผล error stack
+      res.status(500).send(`Error executing query: ${err.message}`);
       return;
     }
-    res.send(results);
+    res.json(results);
   });
 });
 
-// เพิ่มการจัดการข้อผิดพลาดสำหรับ Express
-app.use((err, req, res, next) => {
-  console.error('Unexpected error:', err);
-  res.status(500).send('Unexpected error');
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log(`Server is running on port ${process.env.PORT || 3000}`);
+// Middleware to handle unexpected errors
+app.use((err, req, res, next) => {
+  console.error('Unexpected error:', err.stack);
+  res.status(500).send('Unexpected error occurred');
 });

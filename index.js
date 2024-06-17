@@ -1,34 +1,30 @@
 const express = require('express');
 const cors = require('cors');
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 require('dotenv').config();
 const app = express();
 
 app.use(cors());
 
-const connection = mysql.createConnection(process.env.DATABASE_URL);
-
-connection.connect((err) => {
-  if (err) {
-    console.error('Error connecting to the database:', err.stack);
-    return;
-  }
-  console.log('Connected to the database as id ' + connection.threadId);
+const pool = mysql.createPool({
+  uri: process.env.DATABASE_URL,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
 app.get('/', (req, res) => {
   res.send('Hello world!!');
 });
 
-app.get('/anime', (req, res) => {
-  connection.query('SELECT * FROM anime', (err, results) => {
-    if (err) {
-      console.error('Error executing query:', err.stack);  // เพิ่มการแสดงผล error stack
-      res.status(500).send(`Error executing query: ${err.message}`);
-      return;
-    }
-    res.json(results);
-  });
+app.get('/anime', async (req, res) => {
+  try {
+    const [rows, fields] = await pool.query('SELECT * FROM anime');
+    res.json(rows);
+  } catch (err) {
+    console.error('Error executing query:', err.stack);
+    res.status(500).send(`Error executing query: ${err.message}`);
+  }
 });
 
 const PORT = process.env.PORT || 3000;

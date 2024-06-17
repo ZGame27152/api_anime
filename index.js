@@ -27,10 +27,10 @@ app.get('/anime', async (req, res) => {
   }
 });
 
-app.get('/users/:id', (req, res) => {
+app.get('/anime/:id', (req, res) => {
   const id = req.params.id;
   connection.query(
-      'SELECT * FROM users WHERE id = ?', [id],
+      'SELECT * FROM anime WHERE id = ?', [id],
       function (err, results, fields) {
           res.send(results)
       }

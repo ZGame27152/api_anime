@@ -1,0 +1,15 @@
+services:
+  default:
+    commands:
+      start: node index.js
+    env:
+      PORT: 3000
+      DATABASE_URL: your_database_url_here
+
+routes:
+  - handle: yourappname.up.railway.app
+    memory: 512MB
+    ports:
+      - 3000
+    services:
+      - default

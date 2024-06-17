@@ -17,15 +17,15 @@ app.get('/', (req, res) => {
   res.send('Hello world!!');
 });
 
-app.get('/anime', async (req, res) => {
-  try {
-    const [rows, fields] = await pool.query('SELECT * FROM anime');
-    res.json(rows);
-  } catch (err) {
-    console.error('Error executing query:', err.stack);
-    res.status(500).send(`Error executing query: ${err.message}`);
-  }
-});
+app.get('/users/:id', (req, res) => {
+  const id = req.params.id;
+  connection.query(
+      'SELECT * FROM users WHERE id = ?', [id],
+      function (err, results, fields) {
+          res.send(results)
+      }
+  )
+})
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
